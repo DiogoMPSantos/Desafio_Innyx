@@ -63,4 +63,13 @@ class ProdutoController extends Controller
         $this->produtoRepository->delete($id);
         return response()->json(['message' => 'Produto excluído com sucesso.']);
     }
+
+    public function search(Request $request): JsonResponse
+    {
+        $term = $request->query('term', '');
+        $perPage = $request->query('per_page', 10);
+
+        $produtos = $this->produtoRepository->search($term, $perPage);
+        return response()->json($produtos);
+    }
 }
