@@ -4,5 +4,16 @@
 chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
+
+# Espera o banco de dados MySQL ficar disponível
+echo "Waiting for MySQL to be available..."
+
+sleep 5
+
+echo "MySQL is up - running migrations and seeders..."
+
+# Rodar migrations e seeds forçando em produção
+php artisan migrate:fresh --seed --force
+
 # Executa o comando padrão do container (php-fpm)
 exec "$@"
