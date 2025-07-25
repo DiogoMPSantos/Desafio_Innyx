@@ -17,7 +17,8 @@ class ProdutoController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        return response()->json($this->produtoRepository->allPaginated());
+        $perPage = $request->query('per_page', 10);
+        return response()->json($this->produtoRepository->allPaginated($perPage));
     }
 
     public function store(StoreProdutoRequest $request): JsonResponse
