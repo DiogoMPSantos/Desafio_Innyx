@@ -36,7 +36,7 @@ class ProdutoRepository implements ProdutoRepositoryInterface
 
     public function search(string $term, int $perPage = 10): LengthAwarePaginator
     {
-        return Produto::where('nome', 'like', "%$term%")
+        return Produto::with('categoria')->where('nome', 'like', "%$term%")
                       ->orWhere('descricao', 'like', "%$term%")
                       ->paginate($perPage);
     }

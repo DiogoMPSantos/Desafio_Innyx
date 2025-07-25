@@ -42,7 +42,7 @@
 
     <v-data-table
       :headers="headers"
-      :items="filteredProducts"
+      :items="products"
       class="elevation-1"
       :items-per-page="perPage"
       :page="page"
@@ -85,6 +85,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import api from '../axios'
+import debounce from 'lodash/debounce'
 
 const search = ref('')
 const products = ref([])
@@ -122,14 +123,47 @@ const fetchProducts = async () => {
   }
 }
 
+const searchProducts = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const response = await api.get('/produtos/search', {
+      params: {
+        term: search.value.trim(),
+      },
+    })
+    products.value = response.data.data
+    page.value = 1
+  } catch (err) {
+    error.value = 'Erro ao buscar produtos.'
+  } finally {
+    loading.value = false
+  }
+}
 
-watch([perPage, page], fetchProducts, { immediate: true })
+
+const handleSearch = debounce(() => {
+  if (search.value.trim()) {
+    searchProducts()
+  } else {
+    fetchProducts()
+  }
+}, 500)
 
 
-const filteredProducts = computed(() => {
-  const s = search.value.toLowerCase()
-  return products.value.filter(p => p.nome.toLowerCase().includes(s))
+onMounted(() => {
+  fetchProducts()
 })
+
+watch(search, handleSearch)
+
+watch([perPage, page], () => {
+  if (!search.value.trim()) {
+    fetchProducts()
+  }
+}, { immediate: false })
+
+
 
 // const handleEdit = product => {
 //   console.log(`Editar produto ID ${product.id}`)
