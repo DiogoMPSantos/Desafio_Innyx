@@ -166,23 +166,29 @@ const submitForm = async () => {
   saving.value = true
 
   const formData = new FormData()
+
   formData.append('nome', form.value.nome)
   formData.append('descricao', form.value.descricao)
   formData.append('preco', form.value.preco)
   formData.append('data_validade', form.value.data_validade)
   formData.append('categoria_id', form.value.categoria_id)
-  if (form.value.imagem) {
+
+  const hasImage = form.value.imagem instanceof File
+  if (hasImage) {
     const uniqueName = `${Date.now()}_${form.value.imagem.name}`
     formData.append('imagem', form.value.imagem, uniqueName)
   }
 
-  try {
-    if (isEditMode.value) {
-      await api.put(`/produtos/${props.editData.id}`, formData)
-    } else {
-      await api.post('/produtos', formData)
-    }
+  const url = isEditMode.value
+    ? `/produtos/${props.editData.id}`
+    : '/produtos'
 
+  if (isEditMode.value) {
+    formData.append('_method', 'PUT')
+  }
+
+  try {
+    await api.post(url, formData) 
     emit('saved', isEditMode.value ? 'Produto atualizado com sucesso' : 'Produto cadastrado com sucesso')
     close()
   } catch (err) {
