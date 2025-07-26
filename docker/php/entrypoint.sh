@@ -8,12 +8,16 @@ chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 # Espera o banco de dados MySQL ficar disponível
 echo "Waiting for MySQL to be available..."
 
-sleep 5
+sleep 10
 
 echo "MySQL is up - running migrations and seeders..."
 
 # Rodar migrations e seeds forçando em produção
 php artisan migrate:fresh --seed --force
+
+if [ ! -L /var/www/public/storage ]; then
+  php artisan storage:link
+fi
 
 # Executa o comando padrão do container (php-fpm)
 exec "$@"
