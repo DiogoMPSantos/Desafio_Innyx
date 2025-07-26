@@ -67,7 +67,6 @@ const fetchUser = async () => {
   try {
     const response = await api.get('/me')
     user.value = response.data.user
-    console.log(user);
     
   } catch (error) {
     console.error('Erro ao buscar usuário', error)

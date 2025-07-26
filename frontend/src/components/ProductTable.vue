@@ -8,9 +8,26 @@
           prepend-inner-icon="mdi-magnify"
           clearable
           hide-details
+          @click:clear="handleClearSearch"
           :disabled="loading"
         />
       </v-col>
+
+      <ProductFormDialog
+        v-model="showModal"
+        :editData="selectedProduct"
+        @saved="handleSaved"
+        @error="handleError"
+      />
+
+      <v-snackbar
+        v-model="snackbar.show"
+        :timeout="3000"
+        :color="snackbar.color"
+      >
+        {{ snackbar.message }}
+      </v-snackbar>  
+
       <v-col cols="12" md="3" class="d-flex justify-end align-center">
         <v-btn color="primary" @click="handleCreate" :disabled="loading">
           <template v-if="loading">
@@ -56,7 +73,7 @@
     <template #item.imagem="{ item }">
         <v-img 
           v-if="item.imagem"
-          :src="item.imagem"
+          :src="getImagemUrl(item.imagem)"
           alt="Imagem do produto"
           max-width="80"
           max-height="60"
@@ -86,6 +103,8 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import api from '../axios'
 import debounce from 'lodash/debounce'
+import ProductFormDialog from '@/components/ProductFormDialogue.vue'
+import { getImagemUrl } from '../utils/imageHelper.js'
 
 const search = ref('')
 const products = ref([])
@@ -93,6 +112,13 @@ const loading = ref(false)
 const error = ref('')
 const perPage = ref(10)
 const page = ref(1)
+
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: ''
+})
+
 
 const headers = [
   { title: 'ID', value: 'id' },
@@ -123,6 +149,23 @@ const fetchProducts = async () => {
   }
 }
 
+const handleSaved = (message) => {
+  fetchProducts()
+  snackbar.value = {
+    show: true,
+    message,
+    color: 'success'
+  }
+}
+
+function handleError(message) {
+  snackbar.value = {
+    show: true,
+    message,
+    color: 'error'
+  }
+}
+
 const searchProducts = async () => {
   loading.value = true
   error.value = ''
@@ -141,6 +184,10 @@ const searchProducts = async () => {
   }
 }
 
+const handleClearSearch = () => {
+  search.value = ''
+  fetchProducts()
+}
 
 const handleSearch = debounce(() => {
   if (search.value.trim()) {
@@ -149,7 +196,6 @@ const handleSearch = debounce(() => {
     fetchProducts()
   }
 }, 500)
-
 
 onMounted(() => {
   fetchProducts()
@@ -164,10 +210,19 @@ watch([perPage, page], () => {
 }, { immediate: false })
 
 
+const showModal = ref(false)
+const selectedProduct = ref(null)
 
-// const handleEdit = product => {
-//   console.log(`Editar produto ID ${product.id}`)
-// }
+const handleCreate = () => {
+  selectedProduct.value = null
+  showModal.value = true
+}
+
+const handleEdit = (product) => {
+  selectedProduct.value = product
+  showModal.value = true
+}
+
 
 // const handleDelete = product => {
 //   if (confirm(`Deseja excluir "${product.nome}"?`)) {
@@ -175,6 +230,4 @@ watch([perPage, page], () => {
 //   }
 // }
 
-// const handleCreate = () => {
-// }
 </script>
