@@ -119,15 +119,6 @@ Ao executar `php artisan migrate --seed`, serão inseridos:
 - As imagens dos produtos são salvas com nomes únicos no disco e acessíveis via storage público.
 - O diretório `/storage` está com permissões ajustadas no `entrypoint.sh`.
 
----
-
-## 📌 Em desenvolvimento
-
-- Integração com frontend Vue.js (SPA)
-- Filtros adicionais por categoria
-- Upload de imagem com visualização
-
----
 
 ## 👨‍💻 Autor
 
