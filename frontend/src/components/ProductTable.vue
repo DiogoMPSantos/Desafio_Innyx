@@ -57,6 +57,23 @@
       {{ error }}
     </v-alert>
 
+    <v-dialog v-model="confirmDialog.show" max-width="500">
+      <v-card>
+        <v-card-title class="headline">Confirmar exclusão</v-card-title>
+        <v-card-text>
+          Tem certeza que deseja excluir o produto "<strong>{{ confirmDialog.product?.nome }}</strong>"?
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey" text @click="confirmDialog.show = false">Cancelar</v-btn>
+          <v-btn color="red" text @click="confirmDelete" :loading="confirmDialog.loading">
+            Excluir
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-data-table
       :headers="headers"
       :items="products"
@@ -119,6 +136,11 @@ const snackbar = ref({
   color: ''
 })
 
+const confirmDialog = ref({
+  show: false,
+  product: null,
+  loading: false
+})
 
 const headers = [
   { title: 'ID', value: 'id' },
@@ -223,11 +245,37 @@ const handleEdit = (product) => {
   showModal.value = true
 }
 
+const handleDelete = (product) => {
+  confirmDialog.value.product = product
+  confirmDialog.value.show = true
+}
 
-// const handleDelete = product => {
-//   if (confirm(`Deseja excluir "${product.nome}"?`)) {
-//     products.value = products.value.filter(p => p.id !== product.id)
-//   }
-// }
+const confirmDelete = async () => {
+  const product = confirmDialog.value.product
+  confirmDialog.value.loading = true
+  error.value = ''
+
+  try {
+    await api.delete(`/produtos/${product.id}`)
+    
+    await fetchProducts()
+
+    snackbar.value = {
+      show: true,
+      message: `Produto "${product.nome}" excluído com sucesso.`,
+      color: 'success'
+    }
+    
+  } catch (err) {
+    snackbar.value = {
+      show: true,
+      message: `Erro ao excluir o produto "${product.nome}".`,
+      color: 'error'
+    }
+  } finally {
+    confirmDialog.value.loading = false
+    confirmDialog.value.show = false
+  }
+}
 
 </script>
